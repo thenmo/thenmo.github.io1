@@ -38,3 +38,8 @@ algolia:
     index_name: hexo_zh-cn
 twitter: hexojs
 github: hexojs/hexo
+deploy:
+  type: git
+  repo: git@github.com:thenmo/thenmo.github.io.git
+  # example, https://github.com/hexojs/hexojs.github.io
+  branch: master
