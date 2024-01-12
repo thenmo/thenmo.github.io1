@@ -51,8 +51,3 @@ steps:
       branch: main
       folder: public
       commit-message: "${{ github.event.head_commit.message }} Updated By Github Actions"
-
-来源: Barryの小站
-文章作者: itsBarry
-文章链接: https://www.smitten.top/posts/HexoCI.html
-本文章著作权归作者所有，任何形式的转载都请注明出处。
