@@ -1,10 +1,10 @@
 .DS_Store
-.idea/
-node_modules/
-*.log
+Thumbs.db
 db.json
+*.log
+node_modules/
 public/
 .deploy*/
-package-lock.json
-yarn.lock
-/.vscode
+.deploy_git*/
+.idea
+themes/butterfly/.git
