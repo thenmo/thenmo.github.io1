@@ -1,38 +1,67 @@
-# 工作流名称
-name: Deploy Project
+name: CI
 
-# 工作流触发设置
 on:
-  # push进入仓库时触发
   push:
-    # 分支条件设置
     branches:
-     - main
+      - master
 
-# 工作流作业
+env:
+  GIT_USER: Sanonz
+  GIT_EMAIL: sanonz@126.com
+  THEME_REPO: sanonz/hexo-theme-concise
+  THEME_BRANCH: master
+  DEPLOY_REPO: sanonz/sanonz.github.io
+  DEPLOY_BRANCH: master
+
 jobs:
-  # 作业名称
-  deploy-project:
-    # 使用可复用工作流
-    # 也可以通过GitHub仓库引用自己或其他人的工作流
-    uses: ./.github/workflows/deploy.yml
-    # 使用策略复用工作流，例如它会并发执行project-name为vblog-server-admin、
-    # vblog-server-portal、vblog-server-search 的作业，
+  build:
+    name: Build on node ${{ matrix.node_version }} and ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
-      # 矩阵，就是搭配出各种可能，依次复用，可以有多维矩阵
       matrix:
-        # 矩阵的一行，行名称用于引用（可以有多行，多列）
-        project-name: [ vblog-server-admin, vblog-server-portal, vblog-server-search ]
-    # 发送过去的普通属性
-    with:
-      # 引用上面的矩阵
-      project-name: ${{ matrix.project-name }}
-    # 秘密，秘密可以在仓库中设置，可复用工作流要获取秘密属性，只能通过这里传播过去之后获取
-    secrets:
-      # server-host是自定义的秘密名，后面为引用仓库的秘密
-      server-host: ${{ secrets.SERVER_HOST }}
-      mysql-root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      jwt-secret: ${{ secrets.JWT_SECRET }}
-      elastic-password: ${{ secrets.ELASTIC_PASSWORD }}
-      docker-username: ${{ secrets.DOCKER_USERNAME }}
-      docker-password: ${{ secrets.DOCKER_PASSWORD }}
+        os: [ubuntu-latest]
+        node_version: [12.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Checkout theme repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.THEME_REPO }}
+          ref: ${{ env.THEME_BRANCH }}
+          path: themes/concise
+
+      - name: Checkout deploy repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.DEPLOY_REPO }}
+          ref: ${{ env.DEPLOY_BRANCH }}
+          path: .deploy_git
+
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node_version }}
+
+      - name: Configuration environment
+        env:
+          HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_PRI}}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+          cp _config.theme.yml themes/concise/_config.yml
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Deploy hexo
+        run: |
+          npm run deploy
