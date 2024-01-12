@@ -1,4 +1,4 @@
-![未标题1 - 拷贝.png](/未标题1 - 拷贝.png)
+![未标题1 - 拷贝.png](thenmo.github.io/未标题1 - 拷贝.png)
 # Hexo Official Website
 ![未标题1 - 拷贝.png](未标题1 - 拷贝.png)
 <!-- Markdown snippet -->
